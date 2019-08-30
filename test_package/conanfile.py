@@ -1,5 +1,7 @@
-from conans import ConanFile, CMake, tools
 import os
+from pathlib import Path
+
+from conans import CMake, ConanFile, tools
 
 
 class TestPackageConan(ConanFile):
@@ -13,5 +15,10 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
-            bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
+            bin_path = Path('bin') / 'test_package'
+            script_path = Path(__file__).resolve()
+            jsonnet_path = script_path.parent / 'sours.jsonnet'
+            self.run(
+                f"{bin_path} {jsonnet_path}",
+                run_environment=True,
+            )

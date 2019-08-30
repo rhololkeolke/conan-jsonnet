@@ -18,8 +18,14 @@ bool readFile(const std::string &filename, std::string *output) {
 }
 
 int main(int argc, char **argv) {
+  if (argc < 2) {
+    std::cerr << "Must pass filepath of test jsonnet file." << std::endl;
+    return 1;
+  }
+  
+  std::cout << "Loading: " << argv[1] << std::endl;
   std::string input;
-  if (!readFile("../../sours.jsonnet", &input)) {
+  if (!readFile(argv[1], &input)) {
     std::cerr << "Failed to read file" << std::endl;
     return 1;
   }
