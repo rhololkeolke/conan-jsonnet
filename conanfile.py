@@ -90,3 +90,4 @@ class JsonnetConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["jsonnet++", "jsonnet", "md5"]
+        self.env_info.path.append(os.path.join(self.package_folder, "bin"))
