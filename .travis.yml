@@ -1,0 +1,34 @@
+env:
+  global:
+    - CONAN_USERNAME: rhololkeolke
+    - CONAN_LOGIN_USERNAME: rhololkeolke
+    - CONAN_CHANNEL: testing
+    - CONAN_UPLOAD: https://api.bintray.com/conan/rhololkeolke/public-conan
+    - CONAN_STABLE_BRANCH_PATTERN: stable/*
+    - CONAN_UPLOAD_ONLY_WHEN_STABLE: 1
+    - CONAN_ARCHS: x86_64
+    - CONAN_BUILD_POLICY: outdated
+linux: &linux
+  os: linux
+  dist: xenial
+  sudo: required
+  language: python
+  python: '3.7'
+  services: 
+    - docker
+matrix:
+  include:
+  - <<: *linux
+    env: CONAN_GCC_VERSIONS=8 CONAN_DOCKER_IMAGE=conanio/gcc8
+  - <<: *linux
+    env: CONAN_GCC_VERSIONS=9 CONAN_DOCKER_IMAGE=conanio/gcc9
+  - <<: *linux
+    env: CONAN_CLANG_VERSIONS=7.0 CONAN_DOCKER_IMAGE=conanio/clang7
+  - <<: *linux
+    env: CONAN_CLANG_VERSIONS=8 CONAN_DOCKER_IMAGE=conanio/clang8
+install:
+  - chmod +x .travis/install.sh
+  - "./.travis/install.sh"
+script:
+  - chmod +x .travis/run.sh
+  - "./.travis/run.sh"
