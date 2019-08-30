@@ -74,12 +74,6 @@ class JsonnetConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        # Fixes https://github.com/google/jsonnet/issues/694
-        if self.options.shared:
-            self.copy(pattern='*libmd5.so*', dst="lib", keep_path=False)
-        else:
-            self.copy(pattern='*libmd5.a*', dst="lib", keep_path=False)
-
         # Installer will copy both shared and static libs.  Delete
         # whichever one was not requested. Otherwise, when linking
         # against this package the shared objects will likely be used
@@ -91,7 +85,8 @@ class JsonnetConan(ConanFile):
         else:
             lib_glob = "*.so*"
         for filepath in lib_folder.glob(lib_glob):
-            filepath.unlink()
+            if filepath.stem != "libmd5":
+                filepath.unlink()
 
     def package_info(self):
-        self.cpp_info.libs = ['jsonnet++', 'jsonnet', 'md5']
+        self.cpp_info.libs = ["jsonnet++", "jsonnet", "md5"]

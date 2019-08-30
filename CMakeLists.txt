@@ -14,3 +14,9 @@ conan_basic_setup()
 include_directories("${CONAN_JSONFORMODERNCPP_ROOT}/include/nlohmann")
 
 add_subdirectory("source_subfolder")
+
+# Fixes https://github.com/google/jsonnet/issues/694
+install(TARGETS md5
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib)
