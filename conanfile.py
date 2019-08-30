@@ -6,7 +6,7 @@ from conans import CMake, ConanFile, tools
 
 class JsonnetConan(ConanFile):
     name = "jsonnet"
-    version = "0.13.0"
+    version = "20190830"
     description = "Jsonnet - The data templating language"
     topics = ("json", "file-format")
     url = "https://github.com/rhololkeolke/conan-jsonnet"
@@ -24,19 +24,20 @@ class JsonnetConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
+    requires = ("jsonformoderncpp/3.7.0@vthiery/stable",)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def source(self):
-        source_url = "https://github.com/google/jsonnet"
-        tools.get(
-            f"{source_url}/archive/v{self.version}.tar.gz",
-            sha256="f6f0c4ea333f3423f1a7237a8a107c589354c38be8a2a438198f9f7c69b77596",
-        )
-        extracted_dir = f"{self.name}-{self.version}"
+        git = tools.Git(folder=self._source_subfolder)
+        git.clone("https://github.com/google/jsonnet.git", branch="master")
+        git.checkout("5b87ee721da1879318a5c75f0972fec11f2585c5")
 
-        os.rename(extracted_dir, self._source_subfolder)
+        source_folder = Path(".")
+        source_subfolder = source_folder / self._source_subfolder
+        os.symlink(source_subfolder / "include", source_folder / "include")
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -45,6 +46,7 @@ class JsonnetConan(ConanFile):
         cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         cmake.definitions["BUILD_TESTS"] = False
         cmake.definitions["USE_SYSTEM_GTEST"] = True
+        cmake.definitions["USE_SYSTEM_JSON"] = True
         cmake.definitions["BUILD_JSONNET"] = True
         cmake.definitions["BUILD_JSONNETFMT"] = True
         cmake.configure(build_folder=self._build_subfolder)
@@ -72,6 +74,12 @@ class JsonnetConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
+        # Fixes https://github.com/google/jsonnet/issues/694
+        if self.options.shared:
+            self.copy(pattern='*libmd5.so*', dst="lib", keep_path=False)
+        else:
+            self.copy(pattern='*libmd5.a*', dst="lib", keep_path=False)
+
         # Installer will copy both shared and static libs.  Delete
         # whichever one was not requested. Otherwise, when linking
         # against this package the shared objects will likely be used
@@ -86,4 +94,4 @@ class JsonnetConan(ConanFile):
             filepath.unlink()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ['jsonnet++', 'jsonnet', 'md5']

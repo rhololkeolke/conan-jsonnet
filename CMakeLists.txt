@@ -8,4 +8,9 @@ else()
 endif()
 conan_basic_setup()
 
+# necessary because conan package puts header in nlohmann subfolder,
+# but jsonnet include "json.hpp" because that is how things are
+# vendored inside the package.
+include_directories("${CONAN_JSONFORMODERNCPP_ROOT}/include/nlohmann")
+
 add_subdirectory("source_subfolder")
